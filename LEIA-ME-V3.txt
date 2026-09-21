@@ -1,0 +1,8 @@
+V3 — TEMA SESI
+- Mesmo fundo temático aplicado à abertura, escolha do guia, introdução, missões e resultado.
+- Paleta SESI aplicada a botões, progresso e destaques.
+- Emojis dos cinco guias animados com CSS.
+- Card selecionado ganha destaque verde/azul.
+- Cabeçalho SESI/7º ano nas telas internas.
+- Mecânica e as 10 missões foram mantidas.
+OBS.: a imagem usada como fundo ainda é uma referência visual que contém elementos desenhados; na versão final será melhor usar uma arte de fundo limpa, sem interface/textos embutidos.

@@ -1,0 +1,17 @@
+OPERAÇÃO RECONSTRUÇÃO — V4
+1. Extraia o ZIP inteiro.
+2. Abra recuperacao_matematica/index.html no Microsoft Edge.
+3. Não mova somente o index.html: mantenha script.js, style.css e a pasta imagens juntos.
+
+NOVIDADES:
+- 4 alternativas sem A/B/C/D e embaralhadas por missão.
+- Alternativas animadas e feedback visual.
+- Imagens temáticas nas missões.
+- Fórmulas visíveis.
+- Reservatório com animação de enchimento ao acertar.
+- Tela GRANDE FINAL antes das missões 9 e 10.
+- Som sintetizado de grande final e vitória (funciona sem arquivo MP3).
+- Voz do navegador para ler questão e comemorar XP.
+- Botão para ouvir novamente.
+- Tema SESI mantido em todas as telas.
+- Progresso salvo separadamente como V4.

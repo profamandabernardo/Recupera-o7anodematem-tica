@@ -1,0 +1,11 @@
+V4.1 — CORREÇÃO DO BOTÃO CONTINUAR
+
+Foi corrigido um problema de compatibilidade com o Microsoft Edge.
+O JavaScript dependia de elementos com id (name, avg, next etc.) virarem
+automaticamente variáveis globais do navegador. Isso não é confiável e,
+em especial, 'name' pode conflitar com window.name.
+
+Agora todos os botões e campos são acessados explicitamente com
+document.querySelector(), tornando a navegação mais confiável.
+
+Extraia a pasta inteira e abra index.html.

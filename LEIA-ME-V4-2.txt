@@ -1,0 +1,6 @@
+V4.2 — CORREÇÃO VISUAL GLOBAL
+- Corrigido o efeito de "tela dentro da tela" em TODAS as missões ilustradas.
+- A coluna esquerda agora mostra somente o recorte da cena/ilustração.
+- Enunciado, alternativas, fórmula, áudio e botões permanecem como elementos HTML.
+- Missão 4 continua com o reservatório animado em HTML/CSS.
+- Mantidas as correções de navegação da V4.1.
