@@ -1,3 +1,5 @@
+const URL_RESULTADOS = "https://script.google.com/macros/s/AKfycbyqgOPIXzoP7nhlD8TcAMjW_o3hdx0EL-nz6-Blq24PKFqRusLU8-YfTOBUpm7p65PA/exec";
+
 const guides=[
 {id:"faisca",name:"FAÍSCA",emoji:"⚡",desc:"ANIMADO"},{id:"nexo",name:"NEXO",emoji:"🧠",desc:"TRANQUILO"},
 {id:"brasa",name:"BRASA",emoji:"🔥",desc:"DETERMINADO"},{id:"lumi",name:"LUMI",emoji:"🌈",desc:"ALEGRE"},
@@ -33,5 +35,44 @@ function game(feedback="",kind=""){let m=missions[state.index];if(!state.order)s
 function nextMission(msg,kind){save();game(msg,kind);setTimeout(()=>{state.screen=(state.index===8&&!state.finaleSeen)?"finale":"game";state.selected=null;state.order=null;render()},1500)}
 function check(){let m=missions[state.index],val=state.selected;if(val===m.answer){let earned=state.attempts===0?30:state.attempts===1?24:18;state.xp+=earned;state.history.push({mission:state.index+1,skill:m.skill,correct:true,attempts:state.attempts+1,xp:earned});if(m.special==="tank"){let w=document.querySelector("#water");if(w)w.classList.add("fill")}speak(`Isso aí! Você conseguiu! Agora você tem ${state.xp} XP. Arrasou!`);state.index++;state.attempts=0;if(state.index>=10){setTimeout(()=>{state.screen="final";render()},900);return}nextMission(`ISSO! VOCÊ CONSEGUIU! ⭐ +${earned} XP. ARRASOU!`,"good")}else{state.attempts++;if(state.lives>0)state.lives--;document.querySelector(".chosen")?.classList.add("wrong");state.selected=null;if(state.attempts>=3){state.history.push({mission:state.index+1,skill:m.skill,correct:false,attempts:3,xp:0});state.index++;state.attempts=0;if(state.index>=10){state.screen="final";render();return}nextMission(`A RESPOSTA ERA ${fmt(m.answer)} ${m.unit}. VAMOS CONTINUAR!`,"bad")}else{save();setTimeout(()=>game("AINDA NÃO! VOCÊ PERDEU UMA VIDA, MAS TEM OUTRA CHANCE. VEJA A PISTA!","bad"),450)}}}
 function finale(){state.finaleSeen=true;app.innerHTML=`<section class="card finale center"><img src="imagens/finale.png" alt="GRANDE FINAL"><h1>🎆 GRANDE FINAL! 🎆</h1>${guideBox("VOCÊ CHEGOU NAS DUAS ÚLTIMAS MISSÕES! AGORA O DESAFIO FICA MAIS DIFÍCIL. MANTENHA O FOCO E USE TUDO O QUE APRENDEU!")}<button class="btn" id="cont">VAMOS LÁ! 🏆</button><button class="sound" id="fsound">🔊 SOM DE GRANDE FINAL</button></section>`;victorySound();document.querySelector("#fsound").onclick=victorySound;document.querySelector("#cont").onclick=()=>{state.screen="game";state.order=null;render()}}
-function final(){let max=maxRecovery(state.average),rec=Math.round((state.xp/300)*max*100)/100,fa=Math.min(10,Math.round((state.average+rec)*100)/100),per=state.history.filter(h=>h.skill.startsWith("PERÍMETRO")),vol=state.history.filter(h=>h.skill.startsWith("VOLUME")),pct=a=>a.length?Math.round(a.filter(x=>x.correct).length/a.length*100):0;app.innerHTML=`<section class="card center final-card"><div class="trophy">🏆</div><h1>MISSÃO CONCLUÍDA!</h1>${guideBox(`PARABÉNS, ${state.name}! VOCÊ TERMINOU AS 10 MISSÕES. VEJA O QUE VOCÊ CONQUISTOU!`)}<button class="sound" id="again">🔊 OUVIR VITÓRIA NOVAMENTE</button><div class="stats"><div class="stat"><b>⭐ ${state.xp}/300</b>XP</div><div class="stat"><b>❤️ ${state.lives}/10</b>VIDAS</div><div class="stat"><b>+${fmt(rec)}</b>PONTOS</div></div><p>MÉDIA ANTERIOR: <b>${fmt(state.average)}</b></p><div class="final">${fmt(fa)}</div><p><b>NOVA MÉDIA</b></p><div class="stats"><div class="stat"><b>${pct(per)}%</b>PERÍMETRO</div><div class="stat"><b>${pct(vol)}%</b>VOLUME</div><div class="stat"><b>${fmt(max)}</b>MÁXIMO DA RECUPERAÇÃO</div></div><button class="btn secondary" id="restart">RECOMEÇAR DO ZERO</button></section>`;setTimeout(()=>{victorySound();speak(`Missão concluída! Parabéns, ${state.name}! Você completou as dez missões!`)},250);document.querySelector("#again").onclick=()=>{victorySound();speak(`Missão concluída! Parabéns, ${state.name}! Você completou as dez missões!`)};document.querySelector("#restart").onclick=()=>{if(confirm("APAGAR O PROGRESSO E RECOMEÇAR?")){localStorage.removeItem("recMatStateV4");location.reload()}}}
+async function enviarResultadoFinal(dados){
+  if(localStorage.getItem("resultadoRecMatEnviado")==="sim") return;
+  try{
+    await fetch(URL_RESULTADOS,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(dados)
+    });
+    localStorage.setItem("resultadoRecMatEnviado","sim");
+  }catch(erro){
+    console.error("Erro ao enviar resultado:",erro);
+  }
+}
+
+function final(){
+  let max=maxRecovery(state.average),
+      rec=Math.round((state.xp/300)*max*100)/100,
+      fa=Math.min(10,Math.round((state.average+rec)*100)/100),
+      per=state.history.filter(h=>h.skill.startsWith("PERÍMETRO")),
+      vol=state.history.filter(h=>h.skill.startsWith("VOLUME")),
+      pct=a=>a.length?Math.round(a.filter(x=>x.correct).length/a.length*100):0,
+      pp=pct(per), pv=pct(vol);
+
+  enviarResultadoFinal({
+    nome:state.name,
+    mediaAnterior:state.average,
+    xp:state.xp,
+    vidas:state.lives,
+    pontosRecuperados:rec,
+    mediaFinal:fa,
+    perimetro:pp+"%",
+    volume:pv+"%"
+  });
+
+  app.innerHTML=`<section class="card center final-card"><div class="trophy">🏆</div><h1>MISSÃO CONCLUÍDA!</h1>${guideBox(`PARABÉNS, ${state.name}! VOCÊ TERMINOU AS 10 MISSÕES. VEJA O QUE VOCÊ CONQUISTOU!`)}<button class="sound" id="again">🔊 OUVIR VITÓRIA NOVAMENTE</button><div class="stats"><div class="stat"><b>⭐ ${state.xp}/300</b>XP</div><div class="stat"><b>❤️ ${state.lives}/10</b>VIDAS</div><div class="stat"><b>+${fmt(rec)}</b>PONTOS</div></div><p>MÉDIA ANTERIOR: <b>${fmt(state.average)}</b></p><div class="final">${fmt(fa)}</div><p><b>NOVA MÉDIA</b></p><div class="stats"><div class="stat"><b>${pp}%</b>PERÍMETRO</div><div class="stat"><b>${pv}%</b>VOLUME</div><div class="stat"><b>${fmt(max)}</b>MÁXIMO DA RECUPERAÇÃO</div></div><p class="note">📤 RESULTADO ENVIADO PARA A PROFESSORA.</p><button class="btn secondary" id="restart">RECOMEÇAR DO ZERO</button></section>`;
+  setTimeout(()=>{victorySound();speak(`Missão concluída! Parabéns, ${state.name}! Você completou as dez missões!`)},250);
+  document.querySelector("#again").onclick=()=>{victorySound();speak(`Missão concluída! Parabéns, ${state.name}! Você completou as dez missões!`)};
+  document.querySelector("#restart").onclick=()=>{if(confirm("APAGAR O PROGRESSO E RECOMEÇAR?")){localStorage.removeItem("recMatStateV4");localStorage.removeItem("resultadoRecMatEnviado");location.reload()}};
+}
 render();
